@@ -1,0 +1,886 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+- url: https://virtserver.swaggerhub.com/PTREFILOV/yatracker/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: https://api.tracker.yandex.net/v2
+  description: Yandex Tracker API main server
+tags:
+  - name: "user"
+  - name: "worklog"
+  - name: "issues"
+info:
+  version: 1.0.0
+  title: Yandex Tracker API
+  description: ''
+paths:
+  /myself:
+    get:
+      tags:
+        - "user"
+      summary: Получение информации о текущем пользователе
+      description: Возвращает информацию о текущем пользователе
+      parameters: []
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/myselfModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+        '404':
+          description: Запрошенный объект не был найден
+  /users:
+    get:
+      tags:
+        - "user"
+      summary: Получение списка пользователей
+      description: Возвращает список пользователей
+      parameters: []
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/userModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+  /users/{uid_login}:
+    get:
+      tags:
+        - "user"
+      summary: Получить информацию о пользователе
+      description: Получает информацию о пользователе на основе его уникального идентификатора.
+      parameters:
+        - name: uid_login
+          in: path
+          description: Уникальный идентификатор учетной записи пользователя.
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/userModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: Недостаточно прав доступа
+        '404':
+          description: Объект не найден
+  /issues/{issue-id}/worklog:
+    post:
+      tags:
+        - "worklog"
+      summary: Создание записи о затраченном времени на задачу
+      description: Создает новую запись о затраченном времени на указанную задачу
+      parameters:
+        - name: issue-id
+          in: path
+          description: Идентификатор задачи
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/worklogRequest'
+      responses:
+        '201':
+          description: Запись о затраченном времени успешно создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/worklogModel'
+        '400':
+          description: Один или несколько параметров запроса имеют недопустимое значение
+        '403':
+          description: У вас не хватает прав на выполнение этого действия. Наличие прав можно перепроверить в интерфейсе Tracker — для выполнения действия при помощи API и через интерфейс требуются одинаковые права
+        '404':
+          description: Запрошенный объект не был найден. Возможно, вы указали неверное значение идентификатора или ключа объекта
+        '422':
+          description: Ошибка валидации JSON, запрос отклонен
+        '500':
+          description: Внутренняя ошибка сервиса. Попробуйте повторно отправить запрос через некоторое время
+        '503':
+          description: Сервис API временно недоступен
+    get:
+      tags:
+        - "worklog"
+      summary: Получение всех записей о времени, затраченном на выполнение задачи
+      description: Возвращает данные о времени, затраченном на выполнение задачи
+      parameters:
+        - name: issue-id
+          in: path
+          description: Идентификатор или ключ задачи
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/worklogModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+        '404':
+          description: Запрошенный объект не был найден
+  /issues/{issue-id}/worklog/{worklog-id}:
+    patch:
+      tags:
+        - "worklog"
+      summary: Обновление записи о затраченном времени
+      parameters:
+        - name: issue-id
+          in: path
+          description: Идентификатор задачи
+          required: true
+          schema:
+            type: string
+        - name: worklog-id
+          in: path
+          description: Идентификатор записи о затраченном времени
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/updateWorklogRequest'
+      responses:
+        '200':
+          description: Запись о затраченном времени успешно обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/worklogModel'
+        '400':
+          description: Один или несколько параметров запроса имеют недопустимое значение
+        '403':
+          description: У вас не хватает прав на выполнение этого действия. Наличие прав можно перепроверить в интерфейсе Tracker — для выполнения действия при помощи API и через интерфейс требуются одинаковые права
+        '404':
+          description: Запрошенный объект не был найден. Возможно, вы указали неверное значение идентификатора или ключа объекта
+        '422':
+          description: Ошибка валидации JSON, запрос отклонен
+        '500':
+          description: Внутренняя ошибка сервиса. Попробуйте повторно отправить запрос через некоторое время
+        '503':
+          description: Сервис API временно недоступен
+    delete:
+      tags:
+        - "worklog"
+      summary: Удалить запись о затраченном времени
+      parameters:
+        - name: issue-id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: worklog-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful response. No content returned.
+        '403':
+          description: У вас не хватает прав на выполнение этого действия. Наличие прав можно перепроверить в интерфейсе Tracker — для выполнения действия при помощи API и через интерфейс требуются одинаковые права
+        '404':
+          description: Запрошенный объект не был найден. Возможно, вы указали неверное значение идентификатора или ключа объекта.
+        '500':
+          description: Внутренняя ошибка сервиса. Попробуйте повторно отправить запрос через некоторое время.
+        '503':
+          description: Сервис API временно недоступен.
+  /worklog/_search:
+    post:
+      tags:
+        - "worklog"
+      summary: Получение записей о затраченном времени
+      parameters:
+        - in: query
+          name: perPage
+          schema:
+            type: integer
+          description: Количество результатов на странице. Значение по умолчанию — 50.
+        - in: query
+          name: page 
+          schema:
+            type: integer
+          description: Номер страницы ответа. Значение по умолчанию — 1.
+      description: Возвращает записи о затраченном времени, отобранные по заданным параметрам
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/worklogSearchParams'
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/worklogModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+        '404':
+          description: Запрошенный объект не был найден
+          headers:
+            X-Total-Pages:
+              description: Общее количество страниц с записями
+              schema:
+                type: integer
+            X-Total-Count:
+              description: Общее число записей в ответе
+              schema:
+                type: integer
+  /issues/{issue-id}:
+    get:
+      tags:
+        - "issues"
+      summary: Получить параметры задачи
+      description: Запрос позволяет получить информацию о задаче.
+      parameters:
+        - name: issue-id
+          in: path
+          description: Идентификатор или ключ задачи
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/issuesModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+        '404':
+          description: Запрошенный объект не был найден
+    patch:
+      tags:
+        - "issues"
+      summary: Обновление записи о затраченном времени
+      parameters:
+        - name: issue-id
+          in: path
+          description: Идентификатор задачи
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/issuePatchRequest'      
+      responses:
+        '200':
+          description: Успешно отредактировано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/issuesModel'
+  /issues:
+    post:
+      tags:
+        - "issues"
+      summary: Создать задачу
+      description: Запрос позволяет создать задачу.
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/issuePostRequest'
+      responses:
+        '200':
+          description: Успешное создание задачи
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/issuesModel'
+        '404':
+          description: Запрошенный объект не был найден. Возможно, вы указали неверное значение идентификатора или ключа объекта.
+        '409':
+          description: При редактировании объекта возник конфликт. Возможно, ошибка возникла из-за неправильно указанной версии изменений
+  /issuetypes:
+    get:
+      tags:
+        - "issues"
+        - "lookup"
+      summary: Запросить список статусов задач
+      description: Запрос позволяет запросить список статусов.
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/issueTypesModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+        '404':
+          description: Запрошенный объект не был найден
+  /priorities:
+    get:
+      tags:
+        - "issues"
+        - "lookup"
+      summary: Получить приоритеты
+      description: Запрос позволяет получить список приоритетов для задачи.
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/prioritiesModel'
+        '401':
+          description: Пользователь не авторизован
+        '403':
+          description: У вас не хватает прав на выполнение этого действия
+        '404':
+          description: Запрошенный объект не был найден
+security:
+  - OAuth2: []
+  - xOrgID: []
+components:
+  securitySchemes:
+    OAuth2:
+      type: apiKey
+      in: header
+      name: Authorization
+    xOrgID:
+      type: apiKey
+      in: header
+      name: X-Org-ID
+  schemas:
+    userInfoModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, содержащий информацию о пользователе
+        id:
+          type: string
+          description: Идентификатор пользователя
+        display:
+          type: string
+          description: Отображаемое имя пользователя
+    statusModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о статусе.
+        id:
+          type: string
+          description: Идентификатор статуса.
+        key:
+          type: string
+          description: Ключ статуса.
+        display:
+          type: string
+          description: Отображаемое название статуса.
+    queueInfoModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию об очереди.
+        id:
+          type: string
+          description: Идентификатор очереди.
+        key:
+          type: string
+          description: Ключ очереди.
+        display:
+          type: string
+          description: Отображаемое название очереди.
+    priorityModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о приоритете.
+        id:
+          type: string
+          description: Идентификатор приоритета.
+        key:
+          type: string
+          description: Ключ приоритета.
+        display:
+          type: string
+          description: Отображаемое название приоритета.
+    issueTypeModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о типе задачи.
+        id:
+          type: string
+          description: Идентификатор типа задачи.
+        key:
+          type: string
+          description: Ключ типа задачи.
+        display:
+          type: string
+          description: Отображаемое название типа задачи.
+    issueTypesModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о типе задачи.
+        id:
+          type: string
+          description: Идентификатор типа задачи.
+        key:
+          type: string
+          description: Ключ типа задачи.
+        name:
+          type: string
+          description: Отображаемое название типа задачи.
+        description:
+          type: string
+          description: Описание типа задачи.
+    issueInfoModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о задаче.
+        id:
+          type: string
+          description: Идентификатор задачи.
+        key:
+          type: string
+          description: Ключ задачи.
+        display:
+          type: string
+          description: Отображаемое название задачи.
+    prioritiesModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о приоритете.
+        id:
+          type: string
+          description: Идентификатор приоритета.
+        version:
+          type: integer
+          description: Версия приоритета.
+        key:
+          type: string
+          description: Ключ статуса.
+        name:
+          type: string
+          description: Отображаемое название приоритета. 
+        description:
+          type: string
+          description: Описание статуса.
+        order:
+          type: integer
+          description: Вес приоритета. Параметр влияет на порядок отображения приоритета в интерфейсе.
+    sprintInfoModel:
+        type: object
+        properties:
+          self:
+            type: string
+            description: Адрес ресурса API, который содержит информацию о спринте.
+          id:
+            type: string
+            description: Идентификатор спринта.
+          display:
+            type: string
+            description: Отображаемое название спринта.
+    myselfModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, содержащий информацию об учетной записи пользователя
+        uid:
+          type: string
+          description: Уникальный идентификатор учетной записи пользователя
+        login:
+          type: string
+          description: Логин пользователя
+        trackerUid:
+          type: integer
+          description: Уникальный идентификатор аккаунта пользователя в Tracker
+        passportUid:
+          type: integer
+          description: Уникальный идентификатор аккаунта пользователя на Яндексе
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        display:
+          type: string
+          description: Отображаемое имя пользователя
+        email:
+          type: string
+          description: Электронная почта пользователя
+        external:
+          type: boolean
+          description: Служебный параметр
+        hasLicense:
+          type: boolean
+          description: Признак наличия у пользователя полного доступа к Tracker
+        dismissed:
+          type: boolean
+          description: Статус пользователя в организации
+        useNewFilters:
+          type: boolean
+          description: Служебный параметр
+        disableNotifications:
+          type: boolean
+          description: Признак принудительного отключения уведомлений для пользователя
+        firstLoginDate:
+          type: string
+          format: date-time
+          description: Дата и время первой авторизации пользователя
+        lastLoginDate:
+          type: string
+          format: date-time
+          description: Дата и время последней авторизации пользователя
+        welcomeMailSent:
+          type: boolean
+          description: Способ добавления пользователя
+    userModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, содержащий информацию об учетной записи пользователя
+        uid:
+          type: string
+          description: Уникальный идентификатор учетной записи пользователя
+        login:
+          type: string
+          description: Логин пользователя
+        trackerUid:
+          type: string
+          description: Уникальный идентификатор аккаунта пользователя в Tracker
+        passportUid:
+          type: string
+          description: Уникальный идентификатор аккаунта пользователя на Яндексе
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        display:
+          type: string
+          description: Отображаемое имя пользователя
+        email:
+          type: string
+          description: Электронная почта пользователя
+        external:
+          type: boolean
+          description: Служебный параметр
+        hasLicense:
+          type: boolean
+          description: Признак наличия у пользователя полного доступа к Tracker
+        dismissed:
+          type: boolean
+          description: Статус пользователя в организации
+        useNewFilters:
+          type: boolean
+          description: Служебный параметр
+        disableNotifications:
+          type: boolean
+          description: Признак принудительного отключения уведомлений для пользователя
+        firstLoginDate:
+          type: string
+          format: date-time
+          description: Дата и время первой авторизации пользователя
+        lastLoginDate:
+          type: string
+          format: date-time
+          description: Дата и время последней авторизации пользователя
+        welcomeMailSent:
+          type: boolean
+          description: Способ добавления пользователя
+    worklogRequest:
+      type: object
+      properties:
+        start:
+          type: string
+          format: date-time
+          description: Дата и время начала работы над задачей
+        duration:
+          type: string
+          description: Затраченное время в формате PnYnMnDTnHnMnS, PnW в соответствии с ISO 8601
+        comment:
+          type: string
+          description: Текст комментария к записи о затраченном времени
+    updateWorklogRequest:
+      type: object
+      properties:
+        duration:
+          type: string
+          description: Затраченное время в формате PnYnMnDTnHnMnS, PnW в соответствии с ISO 8601
+          example: PT520M
+        comment:
+          type: string
+          description: Текст комментария к записи
+          example: время изменено!
+    worklogModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, содержащий запись о затраченном времени
+        id:
+          type: string
+          description: Идентификатор записи о затраченном времени
+        version:
+          type: string
+          description: Версия записи
+        issue:
+          allOf:
+           - $ref: '#/components/schemas/issueInfoModel'
+          description: Информацию о задаче
+        comment:
+          type: string
+          description: Текст комментария к записи
+        createdBy:
+          $ref: '#/components/schemas/userInfoModel'
+        updatedBy:
+          $ref: '#/components/schemas/userInfoModel'
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата и время создания записи
+        updatedAt:
+          type: string
+          format: date-time
+          description: Дата и время обновления записи
+        start:
+          type: string
+          format: date-time
+          description: Дата и время начала работы над задачей
+        duration:
+          type: string
+          description: Затраченное время в формате PnYnMnDTnHnMnS или PnW
+    worklogSearchParams:
+      type: object
+      properties:
+        createdBy:
+          type: string
+          description: Логин пользователя, создавшего записи
+        createdAt:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+              description: Начальная дата и время создания записей
+            to:
+              type: string
+              format: date-time
+              description: Конечная дата и время создания записей
+      required:
+        - createdBy
+        - createdAt
+    issuePostRequest:
+      type: object
+      properties:
+        summary:
+          type: string
+          description: Название задачи
+        queue:
+          type: string
+          description: Очередь, в которой нужно создать задачу. Может задаваться как объект, как строка (если передается ключ очереди), как число (если передается идентификатор очереди).
+        description:
+          type: string
+          description: Описание задачи.
+        parent:
+          type: string
+          description: Родительская задача.
+        type:
+          type: string
+          description: Тип задачи.
+        assignee:
+          type: string
+          description: Идентификатор сотрудника.
+        priority:
+          type: string
+          description: Приоритет задачи.
+        followers:
+          type: array
+          items:
+            type: string
+          description: Идентификаторы или логины наблюдателей задачи.
+        sprint:
+          type: string
+          description: Блок с информацией о спринтах.
+        attachmentIds:
+          type: array
+          items:
+            type: string
+          description: Список идентификаторов вложений.
+      required:
+        - summary
+        - queue
+    issuePatchRequest:
+      type: object
+      properties:
+        summary:
+          type: string
+          description: Название задачи
+        description:
+          type: string
+          description: Описание задачи.
+        parent:
+          type: string
+          description: Родительская задача.
+        type:
+          type: string
+          description: Тип задачи.
+        priority:
+          type: string
+          description: Приоритет задачи.
+        followers:
+          type: array
+          items:
+            type: string
+          description: Идентификаторы или логины наблюдателей задачи.
+        sprint:
+          type: string
+          description: Блок с информацией о спринтах.
+    issuesModel:
+      type: object
+      properties:
+        self:
+          type: string
+          description: Адрес ресурса API, который содержит информацию о задаче.
+        id:
+          type: string
+          description: Идентификатор задачи.
+        key:
+          type: string
+          description: Ключ задачи.
+        version:
+          type: number
+          description: Версия задачи. Каждое изменение параметров задачи увеличивает номер версии.
+        lastCommentUpdatedAt:
+          type: string
+          description: Дата и время последнего добавленного комментария.
+        summary:
+          type: string
+          description: Название задачи.
+        parent:
+          allOf:
+           - $ref: '#/components/schemas/issueInfoModel'
+          description: Объект с информацией о родительской задаче.
+        aliases:
+          type: array
+          description: Массив с информацией об альтернативных ключах задачи.
+          items:
+            type: string
+        updatedBy:
+          allOf:
+           - $ref: '#/components/schemas/userInfoModel'
+          description: Объект с информацией о последнем сотруднике, изменявшим задачу.
+        description:
+          type: string
+          description: Описание задачи.
+        sprint:
+          type: array
+          description: Массив объектов с информацией о спринте.
+          items:
+            $ref: '#/components/schemas/sprintInfoModel'
+        type:
+          allOf:
+           - $ref: '#/components/schemas/issueTypeModel'
+          description: Объект с информацией о типе задачи.
+        priority:
+          allOf:
+           - $ref: '#/components/schemas/priorityModel'
+          description: Объект с информацией о приоритете.
+        createdAt:
+          type: string
+          description: Дата и время создания задачи.
+        followers:
+          type: array
+          description: Массив объектов с информацией о наблюдателях задачи.
+          items:
+            $ref: '#/components/schemas/userInfoModel'
+        createdBy:
+          allOf:
+           - $ref: '#/components/schemas/userInfoModel'
+          description: Объект с информацией о создателе задачи.
+        votes:
+          type: number
+          description: Количество голосов за задачу.
+        assignee:
+          allOf:
+           - $ref: '#/components/schemas/userInfoModel'
+          description: Объект с информацией об исполнителе задачи.
+        queue:
+          allOf:
+           - $ref: '#/components/schemas/queueInfoModel'
+          description: Объект с информацией об очереди задачи.
+        updatedAt:
+          allOf:
+           - $ref: '#/components/schemas/userInfoModel'
+          description: Дата и время последнего обновления задачи.
+        status:
+          allOf:
+           - $ref: '#/components/schemas/statusModel'
+          description: Объект с информацией о статусе задачи.
+        previousStatus:
+          allOf:
+           - $ref: '#/components/schemas/statusModel'
+          description: Объект с информацией о предыдущем статусе задачи.
+        favorite:
+          type: boolean
+          description: Признак избранной задачи.
