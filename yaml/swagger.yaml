@@ -10,7 +10,6 @@ servers:
   description: Yandex Tracker API main server
 security:
 - OAuth2: []
-- xOrgID: []
 tags:
 - name: user
 - name: worklog
@@ -934,12 +933,18 @@ components:
           type: string
           description: Конечная дата и время создания записей
           format: date-time
+  parameters:
+    xOrgID:
+      name: X-Org-ID
+      in: header
+      description: My custom header parameter
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: string
   securitySchemes:
     OAuth2:
       type: apiKey
       name: Authorization
-      in: header
-    xOrgID:
-      type: apiKey
-      name: X-Org-ID
       in: header
